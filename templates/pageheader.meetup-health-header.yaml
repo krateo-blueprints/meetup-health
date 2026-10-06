@@ -1,0 +1,11 @@
+apiVersion: widgets.templates.krateo.io/v1beta1
+kind: PageHeader
+metadata:
+  name: meetup-health-header
+  namespace: '{{ include "page.tierNamespace" (dict "ctx" . "tier" "common") }}'
+spec:
+  resourcesRefs:
+    items: []
+  widgetData:
+    subtitle: Overview and health status of meetup sites
+    title: Meetup Site Health
