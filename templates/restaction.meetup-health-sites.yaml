@@ -1,0 +1,31 @@
+apiVersion: templates.krateo.io/v1
+kind: RESTAction
+metadata:
+  name: meetup-health-sites
+  namespace: '{{ include "page.tierNamespace" (dict "ctx" . "tier" "common") }}'
+spec:
+  api:
+    - filter: .items.items // []
+      headers:
+        - 'Accept: application/json'
+      name: items
+      path: /apis/composition.krateo.io/v0-1-0/meetupsites
+      verb: GET
+  filter: |
+    {
+      items: [
+        .items[]? | {
+          name: .metadata.name,
+          namespace: .metadata.namespace,
+          image: (.spec.image // "—"),
+          replicasReady: (.status.readyReplicas // 0),
+          feedbackForm: (.status.formUrl // .spec.surveyTitle // "—"),
+          health: (if any(.status.conditions[]?; .type == "Ready" and .status == "True") then "Ready"
+                   elif any(.status.conditions[]?; .status == "False") then "Failing"
+                   else "Progressing" end),
+          healthRank: (if any(.status.conditions[]?; .status == "False") then 2
+                       elif any(.status.conditions[]?; .type == "Ready" and .status == "True") then 0
+                       else 1 end)
+        }
+      ]
+    }
