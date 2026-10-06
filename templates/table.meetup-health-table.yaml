@@ -1,0 +1,29 @@
+apiVersion: widgets.templates.krateo.io/v1beta1
+kind: Table
+metadata:
+  name: meetup-health-table
+  namespace: '{{ include "page.tierNamespace" (dict "ctx" . "tier" "common") }}'
+spec:
+  apiRef:
+    name: meetup-health-sites
+    namespace: krateo-system
+  resourcesRefs:
+    items: []
+  widgetData:
+    allowedResources: []
+    columns:
+      - title: Site
+        valueKey: name
+      - title: Namespace
+        valueKey: namespace
+      - title: Image
+        valueKey: image
+      - title: Ready Replicas
+        valueKey: replicasReady
+      - title: Feedback Form
+        valueKey: feedbackForm
+      - title: Health
+        valueKey: health
+  widgetDataTemplate:
+    - expression: '${ (.items // []) | sort_by([(- .healthRank), .name]) | map([ {valueKey: "name", kind: "jsonSchemaType", type: "string", stringValue: .name}, {valueKey: "namespace", kind: "jsonSchemaType", type: "string", stringValue: .namespace}, {valueKey: "image", kind: "jsonSchemaType", type: "string", stringValue: .image}, {valueKey: "replicasReady", kind: "jsonSchemaType", type: "integer", numberValue: (.replicasReady | round)}, {valueKey: "feedbackForm", kind: "jsonSchemaType", type: "string", stringValue: .feedbackForm}, {valueKey: "health", kind: "tag", stringValue: .health, color: (if .health == "Ready" then "green" elif .health == "Failing" then "red" elif .health == "Progressing" then "orange" else "gray" end)} ]) }'
+      forPath: dataSource
